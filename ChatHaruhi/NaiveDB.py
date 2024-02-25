@@ -1,6 +1,4 @@
 import random
-import string
-import os
 from math import sqrt
 
 
@@ -27,15 +25,17 @@ class NaiveDB:
         self.recompute_norm()
 
     def save(self, file_path):
-        print("warning! directly save folder from dbtype NaiveDB has not been implemented yet, try use role_from_hf to load role instead")
+        print(
+            "warning! directly save folder from dbtype NaiveDB has not been implemented yet, try use role_from_hf to load role instead")
 
     def load(self, file_path):
-        print("warning! directly load folder from dbtype NaiveDB has not been implemented yet, try use role_from_hf to load role instead")
+        print(
+            "warning! directly load folder from dbtype NaiveDB has not been implemented yet, try use role_from_hf to load role instead")
 
     def recompute_norm(self):
         # 补全这部分代码，self.norms 分别存储每个vector的l2 norm
         # 计算每个向量的L2范数
-        self.norms = [sqrt(sum([x**2 for x in vec])) for vec in self.vecs]
+        self.norms = [sqrt(sum([x ** 2 for x in vec])) for vec in self.vecs]
 
     def get_stories_with_id(self, ids):
         return [self.stories[i] for i in ids]
@@ -60,7 +60,7 @@ class NaiveDB:
             self.recompute_norm()
 
         # 计算查询向量的范数
-        query_norm = sqrt(sum([x**2 for x in query_vector]))
+        query_norm = sqrt(sum([x ** 2 for x in query_vector]))
 
         idxs = list(range(len(self.vecs)))
 

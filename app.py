@@ -1,18 +1,21 @@
 import logging
-from ChatHaruhi import ChatHaruhi
-from ChatHaruhi.response_GLM_local import get_response as get_response_GLM_local
-from ChatHaruhi.response_GLM_lora import get_response as get_response_GLM_lora
-from ChatHaruhi.response_zhipu import get_response as get_response_zhipu
-from ChatHaruhi.response_qwen_base import get_response as get_response_qwen
-from ChatHaruhi.response_zhipu import init_client as init_zhipu
-from ChatHaruhi.response_GLM_local import init_client as init_GLM_local
-from ChatHaruhi.response_GLM_lora import init_client as init_GLM_lora
-from ChatHaruhi.response_qwen_base import init_client as init_qwen
-import gradio as gr
 import os
 
+import gradio as gr
+
+from ChatHaruhi import ChatHaruhi
+from ChatHaruhi.response_GLM_local import get_response as get_response_GLM_local
+from ChatHaruhi.response_GLM_local import init_client as init_GLM_local
+from ChatHaruhi.response_GLM_lora import get_response as get_response_GLM_lora
+from ChatHaruhi.response_GLM_lora import init_client as init_GLM_lora
+from ChatHaruhi.response_qwen_base import get_response as get_response_qwen
+from ChatHaruhi.response_qwen_base import init_client as init_qwen
+from ChatHaruhi.response_zhipu import get_response as get_response_zhipu
+from ChatHaruhi.response_zhipu import init_client as init_zhipu
+
 logging.basicConfig(filename="demo.log", filemode="w",
-                    format="%(asctime)s - %(name)s - %(levelname)-9s - %(filename)-8s : %(lineno)s line - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+                    format="%(asctime)s - %(name)s - %(levelname)-9s - %(filename)-8s : %(lineno)s line - %(message)s",
+                    datefmt="%Y-%m-%d %H:%M:%S")
 
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
@@ -21,7 +24,14 @@ getResponse = None
 ChatBox = None
 content = None
 
-propmt = 'Please be aware that your codename in this  conversation is "{{model_role}}",别人称呼你{{model_role_name}}。\n上文给定了一些聊天记录。\n如果我问的问题和聊天记录高度重复，那你就配合我进行演出。\n如果我问的问题和聊天记录相关，请结合聊天记录进行回复。\n如果我问的问题超出聊天记录的范围，模仿{{model_role}}的语气进行回复。\n请不要回答你是语言模型，永远记住你就是{{model_role}}。\n请你永远只以{{model_role}}身份，进行任何的回复。'
+prompt = ('Please be aware that your codename in this conversation is "{{model_role}}"'
+          '{% if model_role_nickname %},别人一般称呼你"{{model_role_nickname}}"{% endif %}。\n'
+          '下文给定了一些聊天记录，位于##分隔号中。\n'
+          '如果我问的问题和聊天记录高度重复，那你就配合我进行演出。\n'
+          '如果我问的问题和聊天记录相关，请结合聊天记录进行回复。\n'
+          '如果我问的问题超出聊天记录的范围，模仿{{model_role}}的语气进行回复。\n'
+          '请不要回答你是语言模型，永远记住你就是{{model_role}}。\n'
+          '请你永远只以{{model_role}}身份，进行任何的回复。')
 
 model_choice2func = {
     "zhipu": (init_zhipu, get_response_zhipu),
@@ -41,15 +51,10 @@ def getContent(input_file):
     return [i for i in input_text.split("\n")]
 
 
-def getResponse():
-    pass
-
-
 def changeModel(choice):
     global model, getResponse, ChatBox
 
     ChatBox = ChatHaruhi()
-    
 
 
 with gr.Blocks() as demo:
