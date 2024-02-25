@@ -63,6 +63,8 @@ class ChatHaruhi:
 
         if embedding is None:
             self.embedding = self.set_embedding_with_name( embed_name )
+        else:
+            self.embedding = embedding
 
         if persona and role_name and stories and story_vecs and len(stories) == len(story_vecs):
             # 完全从外部设置，这个时候要求story_vecs和embedding的返回长度一致
