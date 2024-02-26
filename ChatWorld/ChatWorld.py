@@ -1,7 +1,7 @@
 from jinja2 import Template
 import torch
 
-from .models import qwen_model
+from .models import GLM
 
 from .NaiveDB import NaiveDB
 from .utils import *
@@ -20,7 +20,7 @@ class ChatWorld:
         self.history = []
 
         self.client = None
-        self.model = qwen_model(pretrained_model_name_or_path)
+        self.model = GLM()
         self.db = NaiveDB()
         self.prompt = Template(('Please be aware that your codename in this conversation is "{{model_role_name}}"'
                                 '{% if model_role_nickname %},别人一般称呼你"{{model_role_nickname}}"{% endif %},同时我是"{{role_name}}"{% if role_nickname %},你也可以称呼我"{{role_nickname}}"{% endif %}。\n'
@@ -30,6 +30,7 @@ class ChatWorld:
                                 '如果我问的问题超出聊天记录的范围，模仿{{model_role_name}}的语气进行回复。\n'
                                 '请不要回答你是语言模型，永远记住你就是{{model_role_name}}。\n'
                                 '请你永远只以{{model_role_name}}身份，进行任何的回复。\n'
+                                '{% if RAG %}{% for i in RAG %}##\n{{i}}\n##\n\n{% endfor %}{% endif %}'
                                 ))
 
     def getEmbeddingsFromStory(self, stories: list[str]):
@@ -38,24 +39,30 @@ class ChatWorld:
             if len(self.story_vec) == len(stories) and all([self.story_vec[i]["text"] == stories[i] for i in range(len(stories))]):
                 return [self.story_vec[i]["vec"] for i in range(len(stories))]
 
+        self.story_vec = []
+        for story in stories:
+            with torch.no_grad():
+                vec = self.getEmbedding(story)
+
+            self.story_vec.append({"text": story, "vec": vec})
+
+        return [self.story_vec[i]["vec"] for i in range(len(stories))]
+
+    def getEmbedding(self, text: str):
         if self.embedding is None:
             self.embedding = initEmbedding()
 
         if self.tokenizer is None:
             self.tokenizer = initTokenizer()
 
-        self.story_vec = []
-        for story in stories:
-            with torch.no_grad():
-                inputs = self.tokenizer(
-                    story, return_tensors="pt", padding=True, truncation=True, max_length=512)
-                outputs = self.embedding(**inputs)[0][:, 0]
-                vec = torch.nn.functional.normalize(
-                    outputs, p=2, dim=1).tolist()[0]
+        with torch.no_grad():
+            inputs = self.tokenizer(
+                text, return_tensors="pt", padding=True, truncation=True, max_length=512).to(self.embedding.device)
+            outputs = self.embedding(**inputs)[0][:, 0]
+            vec = torch.nn.functional.normalize(
+                outputs, p=2, dim=1).tolist()[0]
 
-            self.story_vec.append({"text": story, "vec": vec})
-
-        return [self.story_vec[i]["vec"] for i in range(len(stories))]
+        return vec
 
     def initDB(self, storys: list[str]):
         story_vecs = self.getEmbeddingsFromStory(storys)
@@ -65,21 +72,26 @@ class ChatWorld:
         self.model_role_name = role_name
         self.model_role_nickname = role_nick_name
 
-    def getSystemPrompt(self, role_name, role_nick_name):
+    def getSystemPrompt(self, text,  role_name, role_nick_name):
         assert self.model_role_name, "Please set model role name first"
 
-        return {"role": "system", "content": self.prompt.render(model_role_name=self.model_role_name, model_role_nickname=self.model_role_nickname, role_name=role_name, role_nickname=role_nick_name)}
+        query = self.getEmbedding(text)
+        rag = self.db.search(query, 5)
 
-    def chat(self, user_role_name: str, text: str, user_role_nick_name: str = None, use_local_model=False):
-        message = [self.getSystemPrompt(
-            user_role_name, user_role_nick_name)] + self.history
+        return {"role": "system", "content": self.prompt.render(model_role_name=self.model_role_name, model_role_nickname=self.model_role_nickname, role_name=role_name, role_nickname=role_nick_name, RAG=rag)}
 
+    def chat(self, text: str, user_role_name: str, user_role_nick_name: str = None, use_local_model=False):
+        message = [self.getSystemPrompt(text,
+                                        user_role_name, user_role_nick_name)] + self.history
+        print(message)
         if use_local_model:
             response = self.model.get_response(message)
         else:
             response = self.client.chat(
                 user_role_name, text, user_role_nick_name)
 
-        self.history.append({"role": "user", "content": text})
-        self.history.append({"role": "model", "content": response})
+        self.history.append(
+            {"role": "user", "content": f"{user_role_name}:「{text}」"})
+        self.history.append(
+            {"role": "assistant", "content": f"{self.model_role_name}:「{response}」"})
         return response

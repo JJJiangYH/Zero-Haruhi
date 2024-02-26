@@ -38,8 +38,8 @@ def getContent(input_file):
 
 def submit_message(message, history, model_role_name, role_name, model_role_nickname, role_nickname):
     chatWorld.setRoleName(model_role_name, model_role_nickname)
-    response = chatWorld.chat(
-        role_name, message, role_nickname, use_local_model=True)
+    response = chatWorld.chat(message,
+                              role_name, role_nickname, use_local_model=True)
     return response
 
 
