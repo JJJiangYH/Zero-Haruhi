@@ -6,4 +6,4 @@ def initEmbedding(model_name="BAAI/bge-small-zh-v1.5", **model_wargs):
 
 
 def initTokenizer(model_name="BAAI/bge-small-zh-v1.5", **model_wargs):
-    return AutoTokenizer.from_pretrained(model_name)
+    return AutoTokenizer.from_pretrained(model_name, **model_wargs)

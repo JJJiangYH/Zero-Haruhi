@@ -8,7 +8,7 @@ from .utils import *
 
 
 class ChatWorld:
-    def __init__(self, pretrained_model_name_or_path="silk-road/Haruhi-Zero-14B-0_5", embedding_model_name_or_path="BAAI/bge-small-zh-v1.5") -> None:
+    def __init__(self, pretrained_model_name_or_path="silk-road/Haruhi-Zero-14B-0_5", embedding_model_name_or_path="BAAI/bge-small-zh-v1.5",global_batch_size=16) -> None:
         self.embedding = initEmbedding(embedding_model_name_or_path)
         self.tokenizer = initTokenizer(embedding_model_name_or_path)
         self.story_vec: list[dict] = None
@@ -16,6 +16,8 @@ class ChatWorld:
         self.model_role_name = None
         self.model_role_nickname = None
         self.model_name = pretrained_model_name_or_path
+        
+        self.global_batch_size = global_batch_size
 
         self.history = []
 
