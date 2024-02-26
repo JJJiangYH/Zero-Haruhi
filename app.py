@@ -2,14 +2,8 @@ import logging
 import os
 
 import gradio as gr
-from jinja2 import Template
-import torch
 
-from zhipuai import ZhipuAI
-
-from ChatHaruhi import ChatHaruhi
 from ChatWorld import ChatWorld
-from ChatWorld.utils import initEmbedding, initTokenizer
 
 logging.basicConfig(level=logging.INFO, filename="demo.log", filemode="w",
                     format="%(asctime)s - %(name)s - %(levelname)-9s - %(filename)-8s : %(lineno)s line - %(message)s",
