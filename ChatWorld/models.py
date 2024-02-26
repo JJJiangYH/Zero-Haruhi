@@ -61,6 +61,12 @@ class GLM():
 
 class GLM_api:
     def __init__(self, model_name="glm-4"):
+        API_KEY = os.environ["ZHIPU_API_KEY"]
+
+        if API_KEY is None:
+            from google.colab import userdata
+            API_KEY = userdata.get("ZHIPU_API_KEY")
+
         self.client = ZhipuAI(api_key=os.environ["ZHIPU_API_KEY"])
         self.model = model_name
 
