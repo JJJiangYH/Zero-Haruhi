@@ -67,7 +67,7 @@ class GLM_api:
             from google.colab import userdata
             API_KEY = userdata.get("ZHIPU_API_KEY")
 
-        self.client = ZhipuAI(api_key=os.environ["ZHIPU_API_KEY"])
+        self.client = ZhipuAI(api_key=API_KEY)
         self.model = model_name
 
     def chat(self, message):
