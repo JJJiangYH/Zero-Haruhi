@@ -66,8 +66,9 @@ class ChatWorld:
         self.model_role_nickname = role_nick_name
 
     def getSystemPrompt(self, role_name, role_nick_name):
-        assert self.model_role_name and self.model_role_nickname, "Please set model role name first"
-        return self.prompt.render(model_role_name=self.model_role_name, model_role_nickname=self.model_role_nickname, role_name=role_name, role_nickname=role_nick_name)
+        assert self.model_role_name, "Please set model role name first"
+
+        return {"role": "system", "content": self.prompt.render(model_role_name=self.model_role_name, model_role_nickname=self.model_role_nickname, role_name=role_name, role_nickname=role_nick_name)}
 
     def chat(self, user_role_name: str, text: str, user_role_nick_name: str = None, use_local_model=False):
         message = [self.getSystemPrompt(
