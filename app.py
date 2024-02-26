@@ -86,4 +86,4 @@ with gr.Blocks() as demo:
             submit_message_api, chatbot=gr.Chatbot(height=400, label="API模型", render=False), additional_inputs=[model_role_name, role_name, model_role_nickname, role_nickname])
 
 
-demo.launch(server_name="0.0.0.0")
+demo.launch(share=True, server_name="0.0.0.0")
