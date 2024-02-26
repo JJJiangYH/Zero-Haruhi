@@ -9,8 +9,6 @@ logging.basicConfig(level=logging.INFO, filename="demo.log", filemode="w",
                     format="%(asctime)s - %(name)s - %(levelname)-9s - %(filename)-8s : %(lineno)s line - %(message)s",
                     datefmt="%Y-%m-%d %H:%M:%S")
 
-os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-
 chatWorld = ChatWorld()
 
 

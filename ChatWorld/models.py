@@ -33,12 +33,12 @@ class qwen_model:
 
 class GLM():
     def __init__(self, model_name="silk-road/Haruhi-Zero-GLM3-6B-0_4"):
-        tokenizer = AutoTokenizer.from_pretrained(
+        self.tokenizer = AutoTokenizer.from_pretrained(
             model_name, trust_remote_code=True)
         client = AutoModelForCausalLM.from_pretrained(
             model_name, trust_remote_code=True, device_map="auto")
 
-        client = client.eval()
+        self.client = client.eval()
 
     def message2query(messages) -> str:
         # [{'role': 'user', 'content': '老师: 同学请自我介绍一下'}]
