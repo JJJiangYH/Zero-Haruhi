@@ -40,7 +40,7 @@ class GLM():
 
         self.client = client.eval()
 
-    def message2query(messages) -> str:
+    def message2query(self, messages) -> str:
         # [{'role': 'user', 'content': '老师: 同学请自我介绍一下'}]
         # <|system|>
         # You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's instructions carefully. Respond using markdown.
@@ -53,7 +53,8 @@ class GLM():
         return "".join([template.substitute(message) for message in messages])
 
     def get_response(self, message):
-        response, history = self.client.chat(self.tokenizer, message)
+        response, history = self.client.chat(
+            self.tokenizer, self.message2query(message))
         return response
 
 
