@@ -81,7 +81,10 @@ class NaiveDB:
         similarities.sort(key=lambda x: x[0], reverse=True)
         self.last_search_ids = [x[1] for x in similarities[:n_results]]
 
-        
+        stories_length = len(self.stories)
+        search_id_range = [(max(0, i-3), min(i+4, stories_length))
+                           for i in self.last_search_ids]
 
-        top_stories = [self.stories[_id] for _id in self.last_search_ids]
+        top_stories = ["\n".join(self.stories[start:end+1])
+                       for start, end in search_id_range]
         return top_stories

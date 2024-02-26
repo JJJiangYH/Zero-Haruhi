@@ -1,7 +1,7 @@
 from jinja2 import Template
 import torch
 
-from .models import GLM
+from .models import GLM, GLM_api
 
 from .NaiveDB import NaiveDB
 from .utils import *
@@ -19,7 +19,7 @@ class ChatWorld:
 
         self.history = []
 
-        self.client = None
+        self.client = GLM_api()
         self.model = GLM()
         self.db = NaiveDB()
         self.prompt = Template(('Please be aware that your codename in this conversation is "{{model_role_name}}"'
@@ -81,17 +81,15 @@ class ChatWorld:
         return {"role": "system", "content": self.prompt.render(model_role_name=self.model_role_name, model_role_nickname=self.model_role_nickname, role_name=role_name, role_nickname=role_nick_name, RAG=rag)}
 
     def chat(self, text: str, user_role_name: str, user_role_nick_name: str = None, use_local_model=False):
+        self.history.append(
+            {"role": "user", "content": f"{user_role_name}:「{text}」"})
         message = [self.getSystemPrompt(text,
-                                        user_role_name, user_role_nick_name)] + self.history
-        print(message)
+                                        user_role_name, user_role_nick_name), {"role": "user", "content": f"{user_role_name}:「{text}」"}]
         if use_local_model:
             response = self.model.get_response(message)
         else:
-            response = self.client.chat(
-                user_role_name, text, user_role_nick_name)
+            response = self.client.chat(message)
 
-        self.history.append(
-            {"role": "user", "content": f"{user_role_name}:「{text}」"})
         self.history.append(
             {"role": "assistant", "content": f"{self.model_role_name}:「{response}」"})
         return response

@@ -55,6 +55,7 @@ class GLM():
     def get_response(self, message):
         response, history = self.client.chat(
             self.tokenizer, self.message2query(message))
+        print(self.message2query(message))
         return response
 
 
@@ -63,7 +64,8 @@ class GLM_api:
         self.client = ZhipuAI(api_key=os.environ["ZHIPU_API_KEY"])
         self.model = model_name
 
-    def getResponse(self, message):
+    def chat(self, message):
+        print(message)
         response = self.client.chat.completions.create(
-            model=self.model, prompt=message)
-        return response.choices[0].message
+            model=self.model, messages=message)
+        return response.choices[0].message.content
